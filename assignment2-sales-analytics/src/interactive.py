@@ -96,8 +96,8 @@ def execute_analysis(choice: str, filepath: str):
         title = MENU_OPTIONS[choice]
 
         if choice in ['3', '5']:
-            # Rankings
-            display_results(results, title, data_type='list')
+            # Rankings (list of tuples)
+            display_results(results, title)
         elif choice == '4':
             # Time series
             display_results(results, title, plot_type='line')
