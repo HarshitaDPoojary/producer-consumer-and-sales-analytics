@@ -1,155 +1,65 @@
 # Assignment 1: Producer-Consumer Pattern
 
+## Table of Contents
+1. [Overview](#overview)
+2. [What This Project Demonstrates](#what-this-project-demonstrates)
+3. [How It Works](#how-it-works)
+4. [Project Structure](#project-structure)
+5. [Setup Instructions](#setup-instructions)
+6. [How to Run](#how-to-run)
+7. [Sample Outputs](#sample-outputs)
+8. [Testing](#testing)
+9. [Performance Metrics](#performance-metrics)
+10. [Troubleshooting](#troubleshooting)
+
+---
+
 ## Overview
-Implement a classic producer-consumer pattern demonstrating thread synchronization and communication.
 
-## Requirements
-- **Languages**: Python 3.11+
+This project implements a **classic producer-consumer pattern** in Python demonstrating thread synchronization and communication.
 
-## Description
-The program simulates concurrent data transfer between:
-- A **producer thread** that reads from a source container and places items into a shared queue
-- A **consumer thread** that reads from the queue and stores items in a destination container
+**Requirements:**
+- Python 3.11+
+- pytest (for testing)
 
-## Testing Objectives
-- Thread synchronization (Lock mechanism)
-- Concurrent programming (Threading)
-- Blocking queues (Bounded queue with blocking put/get)
-- Wait/Notify mechanism (Condition variables)
+**The Problem:**
+Transfer data concurrently from a source container to a destination container using:
+- A **producer thread** that reads from source and places items into a shared queue
+- A **consumer thread** that reads from the queue and stores items in destination
 
 ---
 
-## Setup Instructions
+## What This Project Demonstrates
 
-### 1. Create Virtual Environment
-```bash
-# Create virtual environment
-python -m venv venv
+Every execution demonstrates all 4 key concurrency mechanisms:
 
-# Activate virtual environment
-# On Windows:
-venv\Scripts\activate
-# On Linux/Mac:
-source venv/bin/activate
-```
+### 1. Thread Synchronization
+- Uses `threading.Lock` for mutual exclusion
+- Protects critical sections (queue operations)
+- Prevents race conditions
+- **Implementation:** [src/shared_queue.py](src/shared_queue.py)
 
-### 2. Install Dependencies
-```bash
-pip install -r requirements.txt
-```
+### 2. Blocking Queues
+- Bounded queue with configurable `max_size`
+- `put()` blocks when queue is full
+- `get()` blocks when queue is empty
+- Uses `collections.deque` for O(1) operations
+- **Implementation:** [src/shared_queue.py](src/shared_queue.py)
 
----
+### 3. Wait/Notify Mechanism
+- Uses `threading.Condition` variables
+- `_not_full`: Producer waits when queue is full
+- `_not_empty`: Consumer waits when queue is empty
+- `notify()` wakes one waiting thread
+- Handles spurious wakeups with `while` loops
+- **Implementation:** [src/shared_queue.py](src/shared_queue.py)
 
-## Quick Start
+### 4. Concurrent Programming
+- Producer and Consumer extend `threading.Thread`
+- Threads run in parallel, not sequentially
+- Proper thread lifecycle: `start()` → `run()` → `join()`
+- **Implementation:** [src/producer.py](src/producer.py), [src/consumer.py](src/consumer.py)
 
-### Option 1: Basic Demo (Default Settings)
-```bash
-python src/main.py
-```
-
-### Option 2: Command-Line Arguments
-```bash
-# Custom configuration
-python run_with_args.py --queue-size 15 --producers 3 --consumers 2 --items 50
-
-# Short form
-python run_with_args.py -q 15 -p 3 -c 2 -i 50
-
-# See all options
-python run_with_args.py --help
-```
-
-### Option 3: Multi-Terminal (Socket-Based)
-```bash
-# Terminal 1: Start server
-python remote/queue_server.py --queue-size 10
-
-# Terminal 2: Add producer
-python remote/remote_producer.py --items 50 --name Producer-1
-
-# Terminal 3: Add consumer
-python remote/remote_consumer.py --items 50 --name Consumer-1
-```
-
----
-
-## Running Tests
-
-### Run All Tests
-```bash
-pytest tests/ -v
-```
-
-Expected: **19 tests PASSED in ~6 seconds**
-
-### Run Specific Test Categories
-```bash
-pytest tests/test_shared_queue.py -v  # Queue tests (6 tests)
-pytest tests/test_producer.py -v      # Producer tests (4 tests)
-pytest tests/test_consumer.py -v      # Consumer tests (4 tests)
-pytest tests/test_integration.py -v   # Integration tests (5 tests)
-```
-
----
-
-## Available Scripts
-
-### 1. `run_with_args.py` - Command-Line Interface
-Run with custom parameters:
-
-| Option | Short | Default | Description |
-|--------|-------|---------|-------------|
-| `--queue-size` | `-q` | 10 | Queue capacity |
-| `--producers` | `-p` | 1 | Number of producers |
-| `--consumers` | `-c` | 1 | Number of consumers |
-| `--items` | `-i` | 100 | Items per producer |
-| `--verbose` | `-v` | False | Show detailed logs |
-
-**Examples:**
-```bash
-# Small queue (more blocking)
-python run_with_args.py -q 5 -i 100
-
-# Many producers
-python run_with_args.py -p 5 -c 2 -q 20
-
-# With detailed logs
-python run_with_args.py -p 2 -c 2 --verbose
-```
-
-### 2. Socket-Based (Multi-Terminal)
-
-**Server:**
-```bash
-python remote/queue_server.py --queue-size 10
-```
-
-**Producer Client:**
-```bash
-python remote/remote_producer.py --items 50 --name Producer-1 --delay 0.01
-```
-
-**Consumer Client:**
-```bash
-python remote/remote_consumer.py --items 50 --name Consumer-1 --delay 0.015
-```
-
-### 3. Other Examples
-
-**Multiple Producers/Consumers:**
-```bash
-python examples/multi_producer_consumer.py
-```
-
-**Test Different Queue Sizes:**
-```bash
-python examples/test_queue_sizes.py
-```
-
-**Custom Scenarios:**
-```bash
-python examples/custom_config.py
-```
 
 ---
 
@@ -316,111 +226,187 @@ assignment1-producer-consumer/
 
 ---
 
-## Key Implementation Details
+## Setup Instructions
 
-### 1. Thread Synchronization
-- Uses `threading.Lock` for mutual exclusion
-- Protects critical sections (queue operations)
-- Prevents race conditions
-- **File:** [src/shared_queue.py](src/shared_queue.py)
+### Step 1: Create Virtual Environment
 
-### 2. Blocking Queue
-- Bounded queue with configurable `max_size`
-- `put()` blocks when queue is full
-- `get()` blocks when queue is empty
-- Uses `collections.deque` for O(1) operations
-- **File:** [src/shared_queue.py](src/shared_queue.py)
-
-### 3. Wait/Notify Mechanism
-- Uses `threading.Condition` variables
-- `_not_full`: Producer waits when queue is full
-- `_not_empty`: Consumer waits when queue is empty
-- `notify()` wakes one waiting thread
-- Handles spurious wakeups with `while` loops
-- **File:** [src/shared_queue.py](src/shared_queue.py)
-
-### 4. Concurrent Programming
-- Producer and Consumer extend `threading.Thread`
-- Threads run in parallel, not sequentially
-- Proper thread lifecycle: `start()` → `run()` → `join()`
-- **Files:** [src/producer.py](src/producer.py), [src/consumer.py](src/consumer.py)
-
----
-
-## Performance Metrics
-
-The implementation tracks:
-- **Total puts**: Number of items added to queue
-- **Total gets**: Number of items removed from queue
-- **Producer wait events**: Number of times producer blocked
-- **Consumer wait events**: Number of times consumer blocked
-- **Average wait times**: Time spent waiting
-
-**Interpreting Results:**
-- `Producer waits > 0, Consumer waits = 0`: Producers blocking (queue too small or slow consumers)
-- `Producer waits = 0, Consumer waits > 0`: Consumers blocking (slow producers)
-- `Both = 0`: No blocking (queue large enough)
-
----
-
-## Examples
-
-### Example 1: Force Blocking
 ```bash
-python run_with_args.py --queue-size 3 --items 100
-```
-Small queue forces frequent blocking.
+# Create virtual environment
+python -m venv venv
 
-### Example 2: Many Producers
+# Activate virtual environment
+# On Windows:
+venv\Scripts\activate
+# On Linux/Mac:
+source venv/bin/activate
+```
+
+### Step 2: Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+This installs:
+- `pytest` - For running unit tests
+
+---
+
+## How to Run
+
+### Option 1: Basic Demo (Default Settings)
+
+**Command:**
+```bash
+python src/main.py
+```
+
+**What it does:**
+- Creates queue with size 10
+- 1 producer, 1 consumer
+- Transfers 100 items
+- Shows verification and performance metrics
+
+**Use this for:**
+- Quick demonstration
+- Understanding basic behavior
+- Seeing default configuration
+
+---
+
+### Option 2: Command-Line Arguments (Custom Configuration)
+
+**Command:**
+```bash
+python run_with_args.py --queue-size 15 --producers 3 --consumers 2 --items 50
+```
+
+**Short form:**
+```bash
+python run_with_args.py -q 15 -p 3 -c 2 -i 50
+```
+
+**Available Options:**
+
+| Option | Short | Default | Description |
+|--------|-------|---------|-------------|
+| `--queue-size` | `-q` | 10 | Queue capacity |
+| `--producers` | `-p` | 1 | Number of producers |
+| `--consumers` | `-c` | 1 | Number of consumers |
+| `--items` | `-i` | 100 | Items per producer |
+| `--verbose` | `-v` | False | Show detailed logs |
+
+**Common Examples:**
+
+**Force blocking (small queue):**
+```bash
+python run_with_args.py -q 3 -i 100
+```
+Small queue forces frequent producer blocking.
+
+**Many producers:**
 ```bash
 python run_with_args.py -p 5 -c 2 -q 20 -i 30
 ```
 5 producers compete for queue space.
 
-### Example 3: Multi-Terminal Demo
+**Verbose logging:**
 ```bash
-# Terminal 1
+python run_with_args.py -p 2 -c 2 --verbose
+```
+Shows detailed thread-level logs of every put/get operation.
+
+**See all options:**
+```bash
+python run_with_args.py --help
+```
+
+**Use this for:**
+- Testing different configurations
+- Understanding how queue size affects blocking
+- Experimenting with multiple producers/consumers
+
+---
+
+### Option 3: Multi-Terminal (Socket-Based)
+
+This mode lets you run producers and consumers in **separate terminal windows**, demonstrating distributed coordination.
+
+**Step 1: Start the server (Terminal 1)**
+```bash
+python remote/queue_server.py --queue-size 10
+```
+Server starts and waits for producer/consumer clients.
+
+**Step 2: Add producer (Terminal 2)**
+```bash
+python remote/remote_producer.py --items 50 --name Producer-1 --delay 0.01
+```
+Producer connects and starts producing items.
+
+**Step 3: Add consumer (Terminal 3)**
+```bash
+python remote/remote_consumer.py --items 50 --name Consumer-1 --delay 0.015
+```
+Consumer connects and starts consuming items.
+
+**Advanced Example (Fast Producer, Slow Consumer):**
+
+Terminal 1:
+```bash
 python remote/queue_server.py
+```
 
-# Terminal 2
+Terminal 2:
+```bash
 python remote/remote_producer.py --items 30 --name FastProducer --delay 0.005
+```
 
-# Terminal 3
+Terminal 3:
+```bash
 python remote/remote_consumer.py --items 30 --name SlowConsumer --delay 0.02
 ```
-Producer faster than consumer → queue fills up!
+Producer is faster → queue fills up and blocks!
+
+**Use this for:**
+- Visual demonstration of distributed systems
+- Understanding network-based coordination
+- Demonstrating blocking with different production/consumption rates
 
 ---
 
-## Troubleshooting
+### Option 4: Example Scripts
 
-### Issue: Tests hang or timeout
-**Cause:** Queue size too small for items being added without consumers running.
+**Multiple producers and consumers:**
+```bash
+python examples/multi_producer_consumer.py
+```
+Runs 3 producers + 3 consumers simultaneously.
 
-**Solution:** Ensure `max_size` ≥ number of items when pre-populating queue, OR start consumers before filling.
+**Test different queue sizes:**
+```bash
+python examples/test_queue_sizes.py
+```
+Compares performance with queue sizes: 5, 10, 20, 50, 100.
 
-### Issue: No blocking behavior
-**Cause:** Queue size too large relative to items.
-
-**Solution:** Use smaller queue (e.g., `max_size=5`) with many items (e.g., 100).
-
-### Issue: "Could not connect to server" (Socket mode)
-**Cause:** Queue server not running.
-
-**Solution:** Start `queue_server.py` first before starting clients.
+**Custom scenarios:**
+```bash
+python examples/custom_config.py
+```
+Runs 5 predefined scenarios with different configurations.
 
 ---
 
-## Sample Output
+## Sample Outputs
 
-### Command-Line Arguments Example
+### Output 1: Command-Line Arguments Example
 
-Running this command:
+**Command:**
 ```bash
 python run_with_args.py -q 15 -p 3 -c 2 -i 50
 ```
 
-Produces this output:
+**Output:**
 ```
 ======================================================================
 PRODUCER-CONSUMER SIMULATION
@@ -460,14 +446,23 @@ Verification:
 ======================================================================
 ```
 
-### Basic Demo Example
+**Interpretation:**
+- 3 producers created 150 items total (50 each)
+- 2 consumers consumed 75 items each
+- Producers blocked 123 times (queue filled up frequently)
+- Consumers never blocked (producers kept queue populated)
+- All items transferred successfully
 
-Running this command:
+---
+
+### Output 2: Basic Demo Example
+
+**Command:**
 ```bash
 python src/main.py
 ```
 
-Produces output similar to:
+**Output:**
 ```
 ============================================================
 PRODUCER-CONSUMER PATTERN DEMONSTRATION
@@ -503,14 +498,23 @@ Avg consumer wait time:   0.000s
 ============================================================
 ```
 
-### Test Suite Example
+**Interpretation:**
+- Single producer created 100 items
+- Single consumer consumed all 100 items
+- Producer blocked 45 times (small queue size of 10)
+- Consumer never blocked (producer kept up)
+- Data integrity verified: all items transferred
 
-Running this command:
+---
+
+### Output 3: Test Suite Example
+
+**Command:**
 ```bash
 pytest tests/ -v
 ```
 
-Produces output like:
+**Output:**
 ```
 tests/test_consumer.py::test_consumer_consumes_all_items PASSED
 tests/test_consumer.py::test_consumer_thread_safe_writes PASSED
@@ -535,9 +539,313 @@ tests/test_shared_queue.py::test_metrics_tracking PASSED
 ===================== 19 passed in 5.76s ======================
 ```
 
+**Interpretation:**
+- All 19 unit and integration tests passed
+- Tests cover: queue operations, producer behavior, consumer behavior, integration
+- Execution time: ~6 seconds
+
+---
+
+### Output 4: Verbose Logging Example
+
+**Command:**
+```bash
+python run_with_args.py -q 5 -p 1 -c 1 -i 20 --verbose
+```
+
+**Output (partial):**
+```
+12:34:56 [Producer-1 ] INFO     Attempting PUT: Item-0
+12:34:56 [Producer-1 ] INFO     PUT success: Item-0, size=1/5
+12:34:56 [Producer-1 ] INFO     Attempting PUT: Item-1
+12:34:56 [Producer-1 ] INFO     PUT success: Item-1, size=2/5
+12:34:56 [Consumer-1 ] INFO     Attempting GET
+12:34:56 [Consumer-1 ] INFO     GET success: Item-0, size=1/5
+12:34:56 [Producer-1 ] INFO     Attempting PUT: Item-2
+12:34:56 [Producer-1 ] INFO     PUT success: Item-2, size=2/5
+12:34:56 [Producer-1 ] INFO     Attempting PUT: Item-3
+12:34:56 [Producer-1 ] INFO     PUT success: Item-3, size=3/5
+12:34:56 [Producer-1 ] INFO     Attempting PUT: Item-4
+12:34:56 [Producer-1 ] INFO     PUT success: Item-4, size=4/5
+12:34:56 [Producer-1 ] INFO     Attempting PUT: Item-5
+12:34:56 [Producer-1 ] INFO     PUT success: Item-5, size=5/5
+12:34:56 [Producer-1 ] WARNING  Queue FULL (5/5), waiting...
+12:34:57 [Consumer-1 ] INFO     GET success: Item-1, size=4/5
+12:34:57 [Producer-1 ] INFO     Wait completed (0.015s)
+12:34:57 [Producer-1 ] INFO     PUT success: Item-6, size=5/5
+...
+```
+
+**Interpretation:**
+- Detailed logs show every put/get operation
+- Timestamps show concurrent execution
+- See exact moments when blocking occurs
+- Useful for debugging and understanding flow
+
+---
+
+### Output 5: Multi-Terminal Example
+
+**Terminal 1 (Server):**
+```bash
+$ python remote/queue_server.py
+
+Queue Server Started
+Host: localhost
+Port: 5555
+Queue Size: 10
+
+Waiting for clients...
+
+[12:34:56] Producer-1 connected
+[12:34:58] Consumer-1 connected
+
+--- Statistics (t=5s) ---
+Queue size: 7/10
+Active producers: 1
+Active consumers: 1
+Total puts: 45
+Total gets: 38
+```
+
+**Terminal 2 (Producer):**
+```bash
+$ python remote/remote_producer.py --items 50 --name Producer-1
+
+Connecting to queue server at localhost:5555...
+Connected successfully!
+
+Producer-1 starting (50 items)...
+
+Producer-1 finished: produced 50 items
+```
+
+**Terminal 3 (Consumer):**
+```bash
+$ python remote/remote_consumer.py --items 50 --name Consumer-1
+
+Connecting to queue server at localhost:5555...
+Connected successfully!
+
+Consumer-1 starting (50 items)...
+
+Consumer-1 finished: consumed 50 items
+```
+
+**Interpretation:**
+- Server coordinates all clients
+- Real-time statistics show queue state
+- Producers and consumers run independently
+- Demonstrates distributed coordination
+
+---
+
+## Testing
+
+### Run All Tests
+
+**Command:**
+```bash
+pytest tests/ -v
+```
+
+**Expected:** 19 tests PASSED in ~6 seconds
+
+### Run Specific Test Categories
+
+**Queue tests only (6 tests):**
+```bash
+pytest tests/test_shared_queue.py -v
+```
+
+**Producer tests only (4 tests):**
+```bash
+pytest tests/test_producer.py -v
+```
+
+**Consumer tests only (4 tests):**
+```bash
+pytest tests/test_consumer.py -v
+```
+
+**Integration tests only (5 tests):**
+```bash
+pytest tests/test_integration.py -v
+```
+
+### What Tests Cover
+
+**SharedQueue Tests:**
+- Basic put/get operations
+- Blocking when queue is full
+- Blocking when queue is empty
+- Thread safety with concurrent access
+- Queue size tracking
+- Metrics tracking accuracy
+
+**Producer Tests:**
+- Produces all source items
+- Handles large datasets
+- Thread naming correctness
+- Handles empty source
+
+**Consumer Tests:**
+- Consumes all items
+- Thread-safe writes with multiple consumers
+- Thread naming correctness
+- Handles mixed data types
+
+**Integration Tests:**
+- Full end-to-end workflow
+- Multiple producers and consumers
+- Concurrent execution (not sequential)
+- Blocking behavior occurs
+- Data order preserved (FIFO)
+
+---
+
+## Performance Metrics
+
+The implementation tracks and displays:
+
+### Metrics Tracked
+
+- **Total puts**: Number of items added to queue
+- **Total gets**: Number of items removed from queue
+- **Producer wait events**: Number of times producer blocked (queue full)
+- **Consumer wait events**: Number of times consumer blocked (queue empty)
+- **Average wait times**: Time spent waiting (seconds)
+- **Execution time**: Total time from start to finish
+- **Throughput**: Items processed per second
+
+### Interpreting Results
+
+**Scenario 1: Producer waits > 0, Consumer waits = 0**
+```
+Producer wait events:     123
+Consumer wait events:     0
+```
+**Meaning:** Producers blocking frequently
+**Causes:**
+- Queue too small
+- Consumers too slow
+- Too many producers
+
+**Scenario 2: Producer waits = 0, Consumer waits > 0**
+```
+Producer wait events:     0
+Consumer wait events:     87
+```
+**Meaning:** Consumers blocking frequently
+**Causes:**
+- Producers too slow
+- Too many consumers
+- Not enough data
+
+**Scenario 3: Both = 0**
+```
+Producer wait events:     0
+Consumer wait events:     0
+```
+**Meaning:** No blocking occurred
+**Causes:**
+- Queue large enough to hold all items
+- Perfect balance between production/consumption
+- May not demonstrate blocking behavior
+
+**Scenario 4: Both > 0**
+```
+Producer wait events:     45
+Consumer wait events:     38
+```
+**Meaning:** Dynamic balance, both blocking at different times
+**This is ideal** - demonstrates full wait/notify mechanism
+
+---
+
+## Troubleshooting
+
+### Issue: Tests hang or timeout
+
+**Symptoms:**
+- Test runs indefinitely
+- No output after several seconds
+- Process must be killed manually
+
+**Cause:**
+Queue size too small for items being added without consumers running.
+
+**Solution:**
+Ensure `max_size` ≥ number of items when pre-populating queue, OR start consumers before filling.
+
+**Example:**
+```python
+# BAD: Will hang
+queue = SharedQueue(max_size=10)
+for i in range(100):  # Trying to add 100 items to size-10 queue
+    queue.put(i)      # Blocks at item 11 with no consumer
+
+# GOOD: Use larger queue or start consumer first
+queue = SharedQueue(max_size=100)  # Can hold all items
+for i in range(100):
+    queue.put(i)
+```
+
+---
+
+### Issue: No blocking behavior
+
+**Symptoms:**
+```
+Producer wait events:     0
+Consumer wait events:     0
+```
+
+**Cause:**
+Queue size too large relative to items.
+
+**Solution:**
+Use smaller queue (e.g., `max_size=5`) with many items (e.g., 100).
+
+**Example:**
+```bash
+# Force blocking
+python run_with_args.py -q 3 -i 100
+```
+
+---
+
+### Issue: "Could not connect to server" (Socket mode)
+
+**Symptoms:**
+```
+Connecting to queue server at localhost:5555...
+Error: [Errno 111] Connection refused
+```
+
+**Cause:**
+Queue server not running.
+
+**Solution:**
+Start `queue_server.py` first before starting clients.
+
+**Correct order:**
+```bash
+# Terminal 1 - Start this FIRST
+python remote/queue_server.py
+
+# Terminal 2 - Then start producer
+python remote/remote_producer.py
+
+# Terminal 3 - Then start consumer
+python remote/remote_consumer.py
+```
+
 ---
 
 ## Deliverables
+
+This project includes:
 
 - Complete source code with all components
 - Thread-safe SharedQueue with Lock and Condition variables
@@ -548,21 +856,11 @@ tests/test_shared_queue.py::test_metrics_tracking PASSED
 - Code documentation with docstrings and comments
 - Command-line interface for custom configurations
 - Socket-based multi-terminal demonstration
+- Comprehensive README with step-by-step instructions
 
 ---
 
-## What This Demonstrates
-
-Every execution shows all 4 key mechanisms:
-
-1. **Thread Synchronization** - Locks protect shared queue
-2. **Blocking Queues** - `put()` blocks when full, `get()` blocks when empty
-3. **Wait/Notify Mechanism** - Threads coordinate via condition variables
-4. **Concurrent Programming** - Multiple threads run in parallel
-
----
-
-## Quick Reference
+## Quick Reference Card
 
 **Basic demo:**
 ```bash
@@ -591,11 +889,6 @@ python remote/remote_producer.py
 python remote/remote_consumer.py
 ```
 
-**See all options:**
-```bash
-python run_with_args.py --help
-```
-
 **Force blocking:**
 ```bash
 python run_with_args.py -q 3 -i 100
@@ -604,4 +897,9 @@ python run_with_args.py -q 3 -i 100
 **Verbose logs:**
 ```bash
 python run_with_args.py --verbose
+```
+
+**See all options:**
+```bash
+python run_with_args.py --help
 ```
