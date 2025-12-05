@@ -101,6 +101,10 @@ pytest tests/ -v
 27 passed in 92.81s
 - All 8 analysis functions
 - CSV parsing (lazy evaluation)
+- Output formatting
+- Visualization generation
+- Integration workflows
+```
 
 ## Technologies Used
 
@@ -122,6 +126,18 @@ pytest tests/ -v
 - **Python 3.11**
 - **Functional Programming** (generators, lambda, map/filter/reduce)
 - **Data Processing** (200K records from Kaggle dataset)
+- **matplotlib** (data visualization)
+- **pytest** (testing framework)
+- **Immutable Data Structures** (namedtuple)
+
+**Core Concepts Demonstrated:**
+- Higher-order functions (map, filter, reduce)
+- Lazy evaluation with generators
+- Pure functions and immutability
+- Function composition
+- Stream-like data processing
+- Lambda expressions
+
 ## Documentation
 
 Each assignment includes comprehensive README with:
