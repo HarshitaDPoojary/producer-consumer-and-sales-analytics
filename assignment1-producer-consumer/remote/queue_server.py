@@ -54,6 +54,10 @@ class QueueServer:
 
             print(f"[{time.strftime('%H:%M:%S')}] {client_name} ({client_type}) connected from {client_address}")
 
+            # Send registration acknowledgment
+            ack = {'status': 'connected'}
+            client_socket.send(pickle.dumps(ack))
+
             # Handle client commands
             while self.running:
                 try:
@@ -123,13 +127,13 @@ class QueueServer:
             print("\n" + "="*70)
             print(f"[{time.strftime('%H:%M:%S')}] SERVER STATISTICS")
             print("="*70)
-            print(f"Queue size:          {metrics['current_size']}/{self.queue.max_size}")
+            print(f"Queue size:          {self.queue.size()}/{self.queue._max_size}")
             print(f"Active producers:    {len(producers)}")
             print(f"Active consumers:    {len(consumers)}")
             print(f"Total puts:          {metrics['total_puts']}")
             print(f"Total gets:          {metrics['total_gets']}")
-            print(f"Producer waits:      {metrics['producer_wait_count']}")
-            print(f"Consumer waits:      {metrics['consumer_wait_count']}")
+            print(f"Producer waits:      {metrics['producer_waits']}")
+            print(f"Consumer waits:      {metrics['consumer_waits']}")
             print("="*70 + "\n")
 
     def start(self):
@@ -146,7 +150,7 @@ class QueueServer:
             print("="*70)
             print(f"Host:        {self.host}")
             print(f"Port:        {self.port}")
-            print(f"Queue size:  {self.queue.max_size}")
+            print(f"Queue size:  {self.queue._max_size}")
             print("="*70)
             print("\nWaiting for clients...\n")
 

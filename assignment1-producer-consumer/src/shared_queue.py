@@ -176,3 +176,12 @@ class SharedQueue:
         """
         with self._lock:
             return len(self._queue)
+
+    @property
+    def max_size(self):
+        """Get maximum queue size
+
+        Returns:
+            int: Maximum capacity of the queue
+        """
+        return self._max_size

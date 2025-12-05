@@ -37,6 +37,12 @@ def main():
         register_msg = {'type': 'producer', 'name': args.name}
         client_socket.send(pickle.dumps(register_msg))
 
+        # Wait for registration acknowledgment
+        ack = pickle.loads(client_socket.recv(1024))
+        if ack['status'] != 'connected':
+            print("Failed to register with server")
+            sys.exit(1)
+
         print(f"Connected! Starting to produce {args.items} items...\n")
 
         items_produced = 0
