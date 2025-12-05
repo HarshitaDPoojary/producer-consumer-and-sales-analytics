@@ -244,6 +244,15 @@ pytest tests/ --cov=src --cov-report=html
 **About the Dataset:**
 This dataset contains 200,000 synthetic sales records simulating real-world product transactions across different U.S. regions. It is designed for data analysis, business intelligence, and machine learning projects, especially in the areas of sales forecasting, customer segmentation, profitability analysis, and regional trend evaluation.
 
+**Why This Dataset is Ideal for Analysis:**
+- **Sufficient Scale:** 200,000 records provide meaningful statistical insights without overwhelming memory constraints, perfect for demonstrating lazy evaluation and streaming patterns
+- **Rich Dimensionality:** 14 columns with categorical (region, category), temporal (order_date), and numerical (revenue, profit, quantity) data enable diverse analytical queries
+- **Real-World Structure:** Mimics actual e-commerce/retail data with hierarchical categories (category → sub_category → product), customer information, and geographic distribution
+- **Clean & Complete:** No missing values or data quality issues, allowing focus on functional programming techniques rather than data cleaning
+- **Multiple Analysis Angles:** Supports time-series analysis, grouping/aggregation, ranking, profit margin calculations, and multi-dimensional segmentation
+- **Demonstrable FP Patterns:** Structure naturally lends itself to map/filter/reduce operations, lazy evaluation with generators, and pure functional transformations
+- **Performance Testing:** Large enough to showcase the efficiency benefits of streaming over loading entire dataset into memory
+
 **Schema:**
 ```
 SalesRecord (namedtuple):
